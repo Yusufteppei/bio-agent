@@ -1,0 +1,14 @@
+{
+    "version": "0.0.1",
+    "created": "2026-07-24",
+    "model": "gpt-4o",
+    "num_train": 500,
+    "num_test": 0,
+    "tools": [
+        "gene_lookup",
+        "classify_sequence",
+        "search_pubmed",
+        "final_answer"
+    ],
+    "description": "Initial biology tool-calling dataset."
+}

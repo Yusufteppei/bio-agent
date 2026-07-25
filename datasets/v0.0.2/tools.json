@@ -1,0 +1,30 @@
+[
+    {
+        "name": "gene_lookup",
+        "description": "Retrieve information about a gene.",
+        "arguments": [
+            "gene_name"
+        ]
+    },
+    {
+        "name": "search_pubmed",
+        "description": "Search PubMed literature.",
+        "arguments": [
+            "query"
+        ]
+    },
+    {
+        "name": "classify_sequence",
+        "description": "Predict protein family.",
+        "arguments": [
+            "sequence"
+        ]
+    },
+    {
+        "name": "final_answer",
+        "description": "Respond directly without external tools.",
+        "arguments": [
+            "content"
+        ]
+    }
+]

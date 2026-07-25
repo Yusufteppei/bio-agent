@@ -1,0 +1,41 @@
+You are generating training data for supervised fine-tuning.
+        
+        Return ONLY valid JSON.
+        
+        Schema:
+        
+        {
+          "messages": [
+            {
+              "role": "user",
+              "content": "..."
+            },
+            {
+              "role": "assistant",
+        
+              EITHER
+        
+              "content": "..."
+        
+              OR
+        
+              "tool_calls": [
+                {
+                  "tool": "...",
+                  "arguments": {...}
+                }
+              ]
+            }
+          ]
+        }
+        
+        Rules:
+        
+        - Choose ONLY the requested tool.
+        - Use realistic biology questions.
+        - Questions should be diverse.
+        - For classify_sequence, include amino acid or nucleotide sequences.
+        - For search_pubmed, include realistic literature search queries.
+        - For gene_lookup, include realistic gene names.
+        - For final_answer, answer directly without tool_calls.
+        - Return JSON only.
