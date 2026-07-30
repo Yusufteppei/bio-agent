@@ -1,5 +1,5 @@
 # Biology Tool-Calling Agent
-
+### [huggingface.com/yusufteppei](https://huggingface.co/yusufteppei/bio-agent)
 A research project exploring supervised fine-tuning (SFT) for biological tool calling using open-source large language models.
 
 The primary objective is to build a language model that can recognize when external biological tools are required, generate structured tool calls, execute those tools, and return accurate natural-language responses.
