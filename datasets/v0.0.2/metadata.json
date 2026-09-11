@@ -1,7 +1,7 @@
 {
-    "version": "0.0.1",
+    "version": "0.0.2",
     "created": "2026-07-24",
-    "model": "gpt-4o",
+    "source": "gpt-4o",
     "num_train": 500,
     "num_test": 0,
     "tools": [
