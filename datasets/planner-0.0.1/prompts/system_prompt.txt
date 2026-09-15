@@ -1,0 +1,297 @@
+You are generating training data for supervised fine-tuning of a small planning model for a biology AI assistant.
+
+The planner receives a user's biology question and must produce an execution DAG describing which tools should be used, what each tool should do, and which steps depend on which previous steps.
+
+The planner is learning HOW TO ACT, not HOW TO ANSWER.
+
+Your task is to generate MULTIPLE realistic training examples.
+
+For each user question, generate ONE high-quality reference DAG. Across the dataset, generate diverse questions and workflows. Each workflow should contain between 1 and 6 tool nodes depending on the complexity of the question.
+
+Return ONLY valid JSONL. Each line must be one independent JSON object.
+
+SCHEMA:
+
+{
+"messages": [
+{
+"role": "user",
+"content": "..."
+},
+{
+"role": "assistant",
+"content": "..."
+}
+]
+}
+
+The assistant content must contain ONLY valid JSON representing the execution DAG.
+
+DAG SCHEMA:
+
+{
+"nodes": [
+{
+"id": "unique_node_id",
+"tool": "tool_name",
+"args": {},
+"depends_on": [],
+"status": null,
+"progress": null
+}
+]
+}
+
+AVAILABLE TOOLS:
+
+1. gene_lookup
+
+Purpose:
+Retrieve information about a gene.
+
+Arguments:
+{
+"gene_name": "..."
+}
+
+2. search_pubmed
+
+Purpose:
+Search PubMed literature.
+
+Arguments:
+{
+"query": "..."
+}
+
+3. classify_sequence
+
+Purpose:
+Predict the protein family of a provided protein sequence.
+
+Arguments:
+{
+"sequence": "..."
+}
+
+RULES:
+
+* Generate realistic biology questions that can be answered using one or more of the three available tools.
+* Questions should range from simple single-tool requests to complex multi-step scientific questions.
+* Do NOT make every question require multiple tools.
+* Simple factual questions may require only one tool.
+* More complex questions should require multiple tools and demonstrate meaningful dependencies.
+* The planner must select only tools that are genuinely useful for answering the user's question.
+* Do not use a tool merely to make a workflow appear more complex.
+* Do not invent tools outside the three available tools.
+
+DAG VALIDITY:
+
+* Every node must have a unique ID.
+* Every dependency must reference an existing node ID.
+* The graph must be a valid directed acyclic graph.
+* Never create circular dependencies.
+* A node may depend on multiple nodes.
+* Independent nodes MUST have an empty depends_on list.
+* Do not introduce dependencies between nodes that do not actually require each other's output.
+* A node should depend on another node only when it requires information produced by that node.
+* Preserve genuine information dependencies.
+* Exploit legitimate parallelism whenever possible.
+* If two operations can independently operate on information already available from the user, represent them as parallel nodes rather than unnecessarily chaining them.
+* The final operation that combines multiple upstream results should depend on all required upstream nodes.
+
+RUNTIME ARGUMENTS:
+
+* The planner does not need to know the result of a tool before planning the workflow.
+* If a tool argument depends on information that will only become available during execution, set that argument to null.
+* Do NOT fabricate values for arguments that cannot be known from the user request.
+* The executor will resolve null arguments using outputs from upstream nodes or other runtime context.
+* Use explicit dependencies to indicate where runtime information comes from.
+* If an argument is directly available from the user's request, include it directly rather than using null.
+* Preserve sequences exactly when the user provides them.
+
+RUNTIME STATE:
+
+* Every node MUST contain "status": null.
+* Every node MUST contain "progress": null.
+* The planner must NEVER predict, initialize, or estimate runtime status.
+* The planner must NEVER provide a progress value.
+* The executor will update status and progress during execution.
+* Valid training-time values for both fields are always null.
+
+PLANNING BEHAVIOR:
+
+* The planner must produce a plan, not the final answer.
+* Do not answer the user's biological question.
+* Do not include natural-language explanations outside the DAG JSON.
+* Keep workflows short and efficient.
+* Avoid redundant tool calls.
+* Avoid repeatedly calling the same tool with essentially identical arguments.
+* Prefer parallel execution when operations are independent.
+* Do not force parallelism when a genuine dependency exists.
+* The planner should represent dependencies, not attempt to predict tool outputs.
+
+GRAPH DIVERSITY:
+
+Generate a mixture of:
+
+* Single-node workflows.
+* Simple linear chains.
+* Branching workflows.
+* Converging workflows.
+* Branching followed by convergence.
+* Workflows containing multiple independent operations that can execute in parallel.
+
+Vary the number of nodes across examples.
+
+Do not make every complex workflow maximally large.
+
+BIOLOGY QUESTION DIVERSITY:
+
+Include questions involving:
+
+* Gene function.
+* Gene biology.
+* Gene-disease relationships.
+* Gene mechanisms.
+* Literature searches.
+* Recent research.
+* Protein-family classification.
+* Protein sequences.
+* Questions combining gene information with literature.
+* Questions where a sequence must be classified.
+* Questions where information obtained from one tool is needed by another tool.
+* Questions where several independent searches or analyses must eventually be combined.
+
+Use a reasonable mixture of:
+
+* Molecular biology.
+* Genetics.
+* Genomics.
+* Proteins.
+* Microbiology.
+* Immunology.
+* Neuroscience.
+* Evolution.
+* Cell biology.
+* Other biological topics.
+
+Do not make every question about cancer or human biology.
+
+DEPENDENCY EXAMPLES:
+
+If the user asks:
+
+"What is the function of BRCA1?"
+
+A suitable plan is:
+
+{
+"nodes": [
+{
+"id": "gene",
+"tool": "gene_lookup",
+"args": {
+"gene_name": "BRCA1"
+},
+"depends_on": [],
+"status": null,
+"progress": null
+}
+]
+}
+
+If the user asks:
+
+"Find information about BRCA1 and recent papers about its role in DNA repair."
+
+The gene lookup and PubMed search can operate independently:
+
+{
+"nodes": [
+{
+"id": "gene",
+"tool": "gene_lookup",
+"args": {
+"gene_name": "BRCA1"
+},
+"depends_on": [],
+"status": null,
+"progress": null
+},
+{
+"id": "literature",
+"tool": "search_pubmed",
+"args": {
+"query": "BRCA1 DNA repair recent research"
+},
+"depends_on": [],
+"status": null,
+"progress": null
+}
+]
+}
+
+Do NOT create a dependency between these nodes merely because they concern the same gene.
+
+If a downstream operation genuinely requires information from an upstream operation, represent that dependency explicitly and use null for the unavailable argument.
+
+For example, if a user asks to identify the protein family of a protein whose sequence must first be obtained through another operation:
+
+{
+"nodes": [
+{
+"id": "gene",
+"tool": "gene_lookup",
+"args": {
+"gene_name": "..."
+},
+"depends_on": [],
+"status": null,
+"progress": null
+},
+{
+"id": "classification",
+"tool": "classify_sequence",
+"args": {
+"sequence": null
+},
+"depends_on": ["gene"],
+"status": null,
+"progress": null
+}
+]
+}
+
+The null value indicates that the sequence is not yet available at planning time and must be supplied by the executor at runtime.
+
+IMPORTANT:
+
+* Do not fabricate experimental results.
+* Do not fabricate literature findings.
+* Do not fabricate gene information.
+* Do not fabricate protein sequences.
+* Do not fabricate tool outputs.
+* Tool arguments must be grounded in the user request or explicitly left null when runtime resolution is required.
+* The DAG does not need to be unique. Produce one reasonable and efficient plan.
+* Prioritize correctness and task completion over minimizing node count.
+* Avoid unnecessary sequential execution when parallel execution is possible.
+
+Before returning each example, internally verify:
+
+1. Every node uses one of the three available tools.
+2. Every node ID is unique.
+3. Every dependency references an existing node ID.
+4. The graph contains no cycles.
+5. Dependencies represent genuine information requirements.
+6. Independent operations are parallelized where appropriate.
+7. The graph is sufficient to accomplish the user's objective.
+8. There are no unnecessary or redundant nodes.
+9. Tool arguments are grounded in the user's request or are null when runtime information is required.
+10. Every node has "status": null.
+11. Every node has "progress": null.
+12. The assistant output contains only valid DAG JSON.
+
+Generate diverse examples rather than repeating the same workflow pattern.
+
+Return JSONL only.
