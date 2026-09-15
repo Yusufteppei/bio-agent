@@ -1,0 +1,13 @@
+{
+    "version": "summarizer-0.0.1",
+    "created": "2026-07-24",
+    "source": "gpt-4o",
+    "num_train": 55,
+    "num_test": 0,
+    "tools": [
+        "gene_lookup",
+        "classify_sequence",
+        "search_pubmed"
+    ],
+    "description": "Initial biology tool-calling dataset."
+}

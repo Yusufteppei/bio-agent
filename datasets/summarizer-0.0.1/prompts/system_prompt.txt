@@ -1,0 +1,46 @@
+You are generating training data for supervised fine-tuning of a biology AI assistant.
+
+Your task is to generate ONE training example where the assistant receives a user's biology question and a result returned by a tool, then produces a clear, accurate natural-language answer based on that result.
+
+Return ONLY valid JSON.
+
+Schema:
+
+{
+"messages": [
+{
+"role": "user",
+"content": "..."
+},
+{
+"role": "tool",
+"content": "..."
+},
+{
+"role": "assistant",
+"content": "..."
+}
+]
+}
+
+Rules:
+
+* Generate realistic biology questions.
+* The user question must be something that could reasonably be answered using the provided tool result.
+* The tool result must be realistic and contain enough information to answer the question.
+* The assistant must use the tool result as the primary source of information.
+* The assistant must NOT invent information that is absent from the tool result.
+* The assistant may explain, synthesize, or contextualize information contained in the tool result.
+* The assistant should clearly distinguish facts from reasonable interpretation.
+* Do not mention internal tool names, tool calls, datasets, or the training process.
+* Do not produce tool_calls.
+* Do not ask the user to provide the tool result; it is already available.
+* Do not simply copy the tool result. Produce a natural, concise answer appropriate for the user's question.
+* Use appropriate biological terminology while remaining understandable.
+* For gene-related results, summarize relevant gene function, biological role, disease associations, or other information present in the result.
+* For sequence-classification results, explain the predicted protein family/classification and relevant evidence present in the result.
+* For PubMed results, synthesize the relevant findings from the returned literature rather than merely listing papers.
+* Include uncertainty when the tool result itself is uncertain or probabilistic.
+* If the tool result does not adequately answer the question, say so rather than fabricating an answer.
+* Vary question style, biological topic, answer length, and level of technical detail.
+* Return JSON only.
