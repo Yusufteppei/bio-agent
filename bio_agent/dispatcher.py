@@ -6,8 +6,7 @@ from bio_agent.tools import *
 TOOLS = {
     "search_pubmed": search_pubmed,
     "gene_lookup": gene_lookup,
-    "classify_sequence": classify_sequence,
-    "final_answer": final_answer
+    "classify_sequence": classify_sequence
 }
 
 

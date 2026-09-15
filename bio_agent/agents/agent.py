@@ -1,7 +1,5 @@
 from pathlib import Path
-
 from transformers import AutoModelForCausalLM, AutoTokenizer
-
 from bio_agent.dispatcher import execute
 from bio_agent.utils import ask_model, summarize_with_llm
 

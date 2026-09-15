@@ -45,17 +45,19 @@ def summarize_with_llm(
     )
 
     prompt = f"""You are a helpful biology assistant.
+            A user asked a question, and reliable tools were used to gather information to answer it. 
+            Your task is to summarize the information and provide a clear, 
+            concise answer to the user's question.
 
-            The following information was obtained from trusted biological tools.
-            
-            User Question:
+            <question>
             {question}
-            
-            Tool Results:
+            </question>
+
+            <results>
             {tool_results}
+            </results>
+
             
-            Write a clear, accurate, and concise answer for the user.
-            Do not mention tool calls or JSON.
     """
 
     inputs = tokenizer(
@@ -67,8 +69,7 @@ def summarize_with_llm(
         outputs = model.generate(
             **inputs,
             max_new_tokens=max_new_tokens,
-            temperature=0.2,
-            do_sample=False,
+            do_sample=True,
             pad_token_id=tokenizer.pad_token_id,
             eos_token_id=tokenizer.eos_token_id,
         )
