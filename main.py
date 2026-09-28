@@ -1,87 +1,74 @@
 from transformers import AutoTokenizer, AutoModelForCausalLM
-
+from bio_agent.profiling import memory
 from bio_agent.dispatcher import execute
 from bio_agent.utils import ask_model, summarize_with_llm
+from peft import PeftModel
+from bio_agent.config import ram_profiling, classifier_model_path, summarizer_model_path, base_model_path
 
 
-MODEL_PATH = "_checkpoints/qwen2.5-0.5b/exp001/merged"
+# load_models
 
+base = AutoModelForCausalLM.from_pretrained(base_model_path)
+memory("Base model loaded", active=ram_profiling)
+    
+model = PeftModel.from_pretrained(base, classifier_model_path, adapter_name="classifier", device_map="auto", torch_dtype="auto")
+memory("Classifier LoRA loaded", active=ram_profiling)
 
-def load_model(model_path=MODEL_PATH):
+model.load_adapter(planner_model_path, adapter_name="planner")
+memory("Planner LoRA loaded", active=ram_profiling)
 
-    print("Loading model...")
-    model = AutoModelForCausalLM.from_pretrained(model_path)
+model.load_adapter(summarizer_model_path, adapter_name="summarizer")
+memory("Summarizer LoRA loaded", active=ram_profiling)    
 
-    print("Loading tokenizer...")
-    tokenizer = AutoTokenizer.from_pretrained(model_path)
-
-    return model, tokenizer
+tokenizer = AutoTokenizer.from_pretrained(classifier_model_path)
+memory("Tokenizer loaded", active=ram_profiling)
 
 
 def main():
 
-    model, tokenizer = load_model()
-
+    
     while True:
+        try:
+            original_prompt = input(">>> ").strip()
 
-        prompt = input(">>> ").strip()
+            if original_prompt.lower() in {"exit", "quit"}:
+                break
 
-        prompt = f"User: {prompt}\nAssistant: "
-        if prompt.lower() in {"exit", "quit"}:
-            break
+            tool_prompt = f"User: {original_prompt}\nAssistant: "
 
-        tool_call_json = ask_model(
-            prompt,
-            model,
-            tokenizer,
-        )
+            # PLAN
+            model.set_adapter("planner")
+            plan_graph = ask_model(
+                tool_prompt,
+                model,
+                tokenizer,
+            )
+            print("\nPlan: ", plan_graph)
+    
 
-        print("\nTool Call")
-        print(tool_call_json)
+            # EXECUTE PLAN
+            tool_results = execute(plan_graph)
+            print("\nTool Results", tool_results)
 
-        tool_results = execute(tool_call_json)
+            # VALIDATOR / SECURITY GUARD
 
-        print("\nTool Results")
-        print(tool_results)
+            
+            # SYNTHESIZER
+            model.set_adapter("summarizer")
+            response = summarize_with_llm(
+                original_prompt,
+                tool_results,
+                model,
+                tokenizer,
+            )
 
-        response = summarize_with_llm(
-            prompt,
-            tool_results,
-            model,
-            tokenizer,
-        )
-
-        print("\nAssistant")
-        print(response)
+            print("\nAssistant: ", response)
+            
+        except Exception as e:
+            print(f"Error: {e}")
+            continue
 
 
 if __name__ == "__main__":
     main()
 
-
-
-"""from pathlib import Path
-
-from bio_agent.agent import BioAgent
-
-MODEL_PATH = (
-    Path(__file__).parent
-    / "checkpoints"
-    / "qwen2.5-0.5b"
-    / "v0.0.1"
-    / "merged"
-)
-
-agent = BioAgent(MODEL_PATH)
-
-while True:
-
-    prompt = input(">>> ")
-
-    if prompt.lower() in {"quit", "exit"}:
-        break
-
-    print()
-    print(agent(prompt))
-    print()
-"""

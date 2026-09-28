@@ -1,10 +1,12 @@
 import json
 import os
+import torch
 import dotenv
 import random
 import re
 from pathlib import Path
 from openai import OpenAI
+from bio_agent.config import base_tokenizer as tokenizer, BASE_MODEL_ID
 dotenv.load_dotenv()
 
 def format_example(example):
@@ -31,7 +33,6 @@ def format_example(example):
 
 
 MAX_LENGTH = 512
-
 def tokenize(example):
 
     prompt, answer = format_example(example)
@@ -68,7 +69,7 @@ def tokenize(example):
         "labels": labels,
     }
 
-#PAD_ID = tokenizer.pad_token_id
+PAD_ID = tokenizer.pad_token_id
 
 def collate_fn(batch):
 
