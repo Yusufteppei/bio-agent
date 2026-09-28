@@ -5,8 +5,9 @@ from torch import cuda
 
 device = "cuda" if cuda.is_available() else "cpu"
 
-DATASET_ROOT = Path(".").__parent__ / "datasets"
-NOTEBOOK_ROOT = Path(".").__parent__ / "notebooks"
+
+DATASET_ROOT = Path(".").resolve().parent / "datasets"
+NOTEBOOK_ROOT = Path(".").resolve().parent / "notebooks"
 
 BASE_MODEL_ID = base_model_path = "Qwen/Qwen2.5-0.5B"
 
