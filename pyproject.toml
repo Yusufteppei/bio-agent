@@ -1,6 +1,14 @@
 [project]
 name = "bio-agent"
 version = "0.0.1"
+dependencies = [
+    "biopython",
+    "torch",
+    "transformers",
+    "langgraph",
+    "peft",
+    "requests"
+]
 
 [build-system]
 requires = ["setuptools>=61"]
